@@ -1,7 +1,7 @@
 import numpy as np
 
-from dlgo.encoders.base import Encoder
-from dlgo.goboard import Move, Point
+from dokigo.encoders.base import Encoder
+from dokigo.goboardv2 import Move, Point
 
 
 class BetaGoEncoder(Encoder):
