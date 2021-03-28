@@ -48,12 +48,12 @@ def worker(q, args,pid):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--board-size', '-b', type=int, default=9)
-    parser.add_argument('--rounds', '-r', type=int, default=2)
+    parser.add_argument('--rounds', '-r', type=int, default=5)
     parser.add_argument('--temperature', '-t', type=float, default=0.8)
     parser.add_argument('--max-moves', '-m', type=int, default=60,
                         help='Max moves per game.')
-    parser.add_argument('--num-games', '-n', type=int, default=2)
-    parser.add_argument('--cpu-cores', '-c', type=int, default=4)
+    parser.add_argument('--num-games', '-n', type=int, default=20)
+    parser.add_argument('--cpu-cores', '-c', type=int, default=30)
     parser.add_argument('--board-out')
     parser.add_argument('--move-out')
 

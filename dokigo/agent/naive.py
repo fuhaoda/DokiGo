@@ -1,6 +1,6 @@
 import random
 from dokigo.agent.base import Agent
-from dokigo.goboardv1 import Move #todo: make the Move do not dependent on goboard
+from dokigo.goboardv2 import Move #todo: make the Move do not dependent on goboard
 from dokigo.base import Point
 from dokigo.agent.utilities import is_point_an_eye
 

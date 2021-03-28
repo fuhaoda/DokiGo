@@ -1,4 +1,4 @@
-from dokigo import goboardv1 as goboard
+from dokigo import goboardv2 as goboard
 from dokigo import base
 from dokigo.utilities import print_board,print_move,point_from_coords
 import random

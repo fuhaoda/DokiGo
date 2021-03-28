@@ -5,7 +5,7 @@ from tensorflow.keras.optimizers import SGD
 from dokigo.agent.base import Agent
 from dokigo.agent.utilities import is_point_an_eye
 from dokigo import encoders
-from dokigo import goboardv1
+from dokigo import goboardv2
 from dokigo import kerasutil
 
 __all__ = [
