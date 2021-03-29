@@ -6,6 +6,7 @@ from dokigo.utilities import print_board,print_move,point_from_coords
 import random
 from dokigo.sgfio import sgf, adaptor
 
+import time
 
 def main():
     board_size = 9
@@ -15,7 +16,7 @@ def main():
 
         game = goboard.GameState.new_game(board_size)
         bot_1 = RandomBot()
-        bot_2 = MCTSAgent(5, 1.5)
+        bot_2 = MCTSAgent(100, 1.5)
         bot_1_color = random.choice(list(base.Player))
         bot_2_color = bot_1_color.other
 
@@ -48,4 +49,6 @@ def main():
     print("The winning rate is %.3f"%(strong_bot_wins/total_games))
 
 if __name__ == '__main__':
+    start = time.time()
     main()
+    print(f"Total time {time.time()-start} seconds")

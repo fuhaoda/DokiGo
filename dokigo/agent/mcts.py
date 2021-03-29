@@ -1,9 +1,10 @@
 import math
 import random
 
-from dokigo.agent import base, naive
+from dokigo.agent import base
 from dokigo.base import Player
-
+#from dokigo.agent.naive import RandomBot
+from dokigo.agent.naive_v2 import FastRandomBot as RandomBot
 
 __all__ = ['MCTSAgent']
 
@@ -120,8 +121,8 @@ class MCTSAgent(base.Agent):
     @staticmethod
     def simulate_random_game(game):
         bots = {
-            Player.black: naive.RandomBot(),
-            Player.white: naive.RandomBot(),
+            Player.black: RandomBot(),
+            Player.white: RandomBot(),
         }
         while not game.is_over():
             bot_move = bots[game.next_player].select_move(game)

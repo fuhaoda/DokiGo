@@ -7,7 +7,7 @@ from dokigo.sgfio import sgf, adaptor
 
 
 def worker(args, pid):
-    
+
     board_size = args.board_size
     rounds = args.rounds
     max_moves = args.max_moves
