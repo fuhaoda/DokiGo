@@ -43,3 +43,22 @@ class DokiGo_to_SGF:
                 root_node.set("RE", "W+R")
                 return
         root_node.set("RE", str(compute_game_result(game_state)))
+
+
+class SGF_to_DokiGo:
+    def __init__(self, file_path, data_generator):
+        self.file_path = file_path
+        self.generator = data_generator
+        self.total_episods = 0
+        self.sgf_files = []
+        self._count_episods()
+
+    def _count_episods(self):
+        pass
+
+    def parse_one_episod(self, sgf_file):
+        pass
+
+    def parse_episods(self, size = None):
+        pass
+
