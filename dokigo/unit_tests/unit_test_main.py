@@ -4,7 +4,7 @@ from dokigo.sgfio.data_generator import SupervisedLearningDataGenerator
 from dokigo.encoders.base import get_encoder_by_name
 from dokigo.sgfio import sgf
 import numpy as np
-from dokigo import goboardv3
+
 from dokigo.utilities import print_board,print_move,point_from_coords
 
 
@@ -48,21 +48,23 @@ class TestSGFIO(unittest.TestCase):
 
 
 class TestGoBoardV3(unittest.TestCase):
+
     def test_ko(self):
+        from dokigo import goboardv4 as goboard
         board_size = 9
-        game = goboardv3.GameState.new_game(board_size)
+        game = goboard.GameState.new_game(board_size)
         single_ko_moves = ['A2','A3','C2','C3','B1','B4','B3','B2']
         the_single_ko_move = 'B3'
         for item in single_ko_moves:
             point = point_from_coords(item.replace(' ', ''))
-            move = goboardv3.Move.play(point)
+            move = goboard.Move.play(point)
             self.assertTrue(game.is_valid_move(move))
             game = game.apply_move(move)
 
         # print_board(game.board)
         # the above code can visualize the ko situation
         point = point_from_coords(the_single_ko_move.replace(' ', ''))
-        move = goboardv3.Move.play(point)
+        move = goboard.Move.play(point)
         self.assertFalse(game.is_valid_move(move))
         self.assertTrue(game.does_move_violate_ko(game.next_player,move))
 
@@ -70,13 +72,13 @@ class TestGoBoardV3(unittest.TestCase):
                              'B8','H3']
         for item in circular_ko_moves:
             point = point_from_coords(item.replace(' ', ''))
-            move = goboardv3.Move.play(point)
+            move = goboard.Move.play(point)
             self.assertTrue(game.is_valid_move(move))
             game = game.apply_move(move)
 
         the_circular_ko_moves = 'B2'
         point = point_from_coords(the_circular_ko_moves.replace(' ', ''))
-        move = goboardv3.Move.play(point)
+        move = goboard.Move.play(point)
         self.assertFalse(game.is_valid_move(move))
         self.assertTrue(game.does_move_violate_ko(game.next_player, move))
 
