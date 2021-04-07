@@ -1,9 +1,10 @@
 import argparse
-from multiprocessing import Process, Queue, cpu_count
-from dokigo import goboardv2 as goboard
+from multiprocessing import Process, cpu_count
+from dokigo import goboardv3 as goboard
 from dokigo.agent import mcts
 import os
 from dokigo.sgfio import sgf, adaptor
+import time
 
 
 def worker(args, pid):
@@ -46,12 +47,12 @@ def worker(args, pid):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--board-size', '-b', type=int, default=9)
-    parser.add_argument('--rounds', '-r', type=int, default=3)
+    parser.add_argument('--rounds', '-r', type=int, default=5)
     parser.add_argument('--temperature', '-t', type=float, default=0.8)
     parser.add_argument('--max-moves', '-m', type=int, default=60,
                         help='Max moves per game.')
-    parser.add_argument('--num-games', '-n', type=int, default=20)
-    parser.add_argument('--cpu-cores', '-c', type=int, default=-1)
+    parser.add_argument('--num-games', '-n', type=int, default=2)
+    parser.add_argument('--cpu-cores', '-c', type=int, default=1)
 
     args = parser.parse_args()  # <1>
 
@@ -73,4 +74,6 @@ def main():
 
 
 if __name__ == '__main__':
+    start = time.time()
     main()
+    print(f"total time spent {time.time()-start}")

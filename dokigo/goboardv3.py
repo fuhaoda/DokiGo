@@ -1,11 +1,16 @@
 """
-This is a fast go board implementation by adding init_neighbor_table and init_corner_table from goboardv1
+This goboard implementation clean some unnessary features from goboardv2.
+For example, we don't need to code empty with zobrist hash. Remove MoveAge.
+change line 97 of gobardv2 copy.deepcopy(self.liberties)
+simplify line 167 of goboardv2 self._replace_string(other_color_string.without_liberty(point))
+delete method will capture in Board class
+delete method hash in Move class
+If success, we can ignore goboardv2
 """
 import copy
 from dokigo.base import Player, Point
 from dokigo.scoring import compute_game_result
 from dokigo import zobrist
-from dokigo.utilities import MoveAge
 
 __all__ = [
     'Board',
@@ -13,8 +18,10 @@ __all__ = [
     'Move',
 ]
 
-neighbor_tables = {} #<1>
-corner_tables = {} #<2>
+neighbor_tables = {}  # <1>
+corner_tables = {}  # <2>
+
+
 # <1> save neighbors in a dictionary neighbor_tables[9] is a neighbor table for a 9x9 Go game for each point
 # <2> save corners in a dictionary corner_tables[1] is a corner table for a 9x9 Go game for each point
 
@@ -63,16 +70,14 @@ class GoString:
 
     def __init__(self, color, stones, liberties):
         self.color = color
-        self.stones = frozenset(stones)
-        self.liberties = frozenset(liberties)
+        self.stones = set(stones)
+        self.liberties = set(liberties)
 
-    def without_liberty(self, point):
-        new_liberties = self.liberties - {point}
-        return GoString(self.color, self.stones, new_liberties)
+    def remove_liberty(self, point):
+        self.liberties.remove(point)
 
-    def with_liberty(self, point):
-        new_liberties = self.liberties | {point}
-        return GoString(self.color, self.stones, new_liberties)
+    def add_liberty(self, point):
+        self.liberties.add(point)
 
     def merged_with(self, string):
         """Return a new string containing all stones in both strings."""
@@ -94,8 +99,9 @@ class GoString:
                self.liberties == other.liberties
 
     def __deepcopy__(self, memodict={}):
-        return GoString(self.color, self.stones, copy.deepcopy(self.liberties)) #maynot copy.deepcopy since it is
-        # immutable
+        return GoString(self.color, self.stones, self.liberties)
+        # immutable. Because the constructor use a set function. A set x itself is mutable, but set(x) generate a new
+        # object.
 
 
 class Board:
@@ -113,7 +119,6 @@ class Board:
             init_corner_table(dim)
         self.neighbor_table = neighbor_tables[dim]
         self.corner_table = corner_tables[dim]
-        self.move_ages = MoveAge(self)
 
     def neighbors(self, point):
         return self.neighbor_table[point]
@@ -122,14 +127,12 @@ class Board:
         return self.corner_table[point]
 
     def place_stone(self, player, point):
-        assert self.is_on_grid(point) # make sure it is on grid
-        assert self._grid.get(point) is None # no existing stone on point
+        assert self.is_on_grid(point)  # make sure it is on grid
+        assert self._grid.get(point) is None  # no existing stone on point
         # 0. Examine the adjacent points.
         adjacent_same_color = []
         adjacent_opposite_color = []
         liberties = []
-        self.move_ages.increment_all()
-        self.move_ages.add(point)
         for neighbor in self.neighbor_table[point]:
             neighbor_string = self._grid.get(neighbor)
             if neighbor_string is None:
@@ -141,48 +144,35 @@ class Board:
                 if neighbor_string not in adjacent_opposite_color:
                     adjacent_opposite_color.append(neighbor_string)
         new_string = GoString(player, [point], liberties)
-        # tag::apply_zobrist[]
         # 1. Merge any adjacent strings of the same color.
         for same_color_string in adjacent_same_color:
             new_string = new_string.merged_with(same_color_string)
         for new_string_point in new_string.stones:
             self._grid[new_string_point] = new_string
-        # Remove empty-point hash code.
-        self._hash ^= zobrist.HASH_CODE[point, None] #todo check if this line is needed
         # Add filled point hash code.
         self._hash ^= zobrist.HASH_CODE[point, player]
-        # end::apply_zobrist[]
 
         # 2. Reduce liberties of any adjacent strings of the opposite
         #    color.
         # 3. If any opposite color strings now have zero liberties,
         #    remove them.
         for other_color_string in adjacent_opposite_color:
-            replacement = other_color_string.without_liberty(point)
-            if replacement.num_liberties:
-                self._replace_string(other_color_string.without_liberty(point))
-            else:
+            other_color_string.remove_liberty(point)
+            if other_color_string.num_liberties == 0:
                 self._remove_string(other_color_string)
-
-    def _replace_string(self, new_string):
-        for point in new_string.stones:
-            self._grid[point] = new_string
 
     def _remove_string(self, string):
         for point in string.stones:
-            self.move_ages.reset_age(point)
             # Removing a string can create liberties for other strings.
             for neighbor in self.neighbor_table[point]:
                 neighbor_string = self._grid.get(neighbor)
                 if neighbor_string is None:
                     continue
                 if neighbor_string is not string:
-                    self._replace_string(neighbor_string.with_liberty(point))
+                    neighbor_string.add_liberty(point)
             self._grid[point] = None
             # Remove filled point hash code.
             self._hash ^= zobrist.HASH_CODE[point, string.color]
-            # Add empty point hash code.
-            self._hash ^= zobrist.HASH_CODE[point, None]
 
     def is_self_capture(self, player, point):
         friendly_strings = []
@@ -200,19 +190,6 @@ class Board:
                     return False
         if all(neighbor.num_liberties == 1 for neighbor in friendly_strings):
             return True
-        return False
-
-    def will_capture(self, player, point):
-        for neighbor in self.neighbor_table[point]:
-            neighbor_string = self._grid.get(neighbor)
-            if neighbor_string is None:
-                continue
-            elif neighbor_string.color == player:
-                continue
-            else:
-                if neighbor_string.num_liberties == 1:
-                    # This move would capture.
-                    return True
         return False
 
     def is_on_grid(self, point):
@@ -249,30 +226,26 @@ class Board:
 
     def __deepcopy__(self, memodict={}):
         copied = Board(self.num_rows, self.num_cols)
-        # Can do a shallow copy b/c the dictionary maps tuples
-        # (immutable) to GoStrings (also immutable)
-        copied._grid = copy.copy(self._grid)
+        copied._grid = copy.deepcopy(self._grid)  # deepcopy is needed since string has liberties and stones which are
+        # sets and sets are mutable
         copied._hash = self._hash
         return copied
 
-    # tag::return_zobrist[]
     def zobrist_hash(self):
         return self._hash
 
 
-# end::return_zobrist[]
-
-
-class Move():
+class Move:
     """Any action a player can play on a turn.
 
     Exactly one of is_play, is_pass, is_resign will be set.
     """
 
     def __init__(self, point=None, is_pass=False, is_resign=False):
-        assert (point is not None) ^ is_pass ^ is_resign
+        self.is_play = (point is not None)
+        assert (self.is_play) ^ is_pass ^ is_resign  # minor known issue: will also return true if 3 of them are
+        # true.
         self.point = point
-        self.is_play = (self.point is not None)
         self.is_pass = is_pass
         self.is_resign = is_resign
 
@@ -296,13 +269,6 @@ class Move():
             return 'resign'
         return '(r %d, c %d)' % (self.point.row, self.point.col)
 
-    def __hash__(self):
-        return hash((
-            self.is_play,
-            self.is_pass,
-            self.is_resign,
-            self.point))
-
     def __eq__(self, other):
         return (
                    self.is_play,
@@ -315,20 +281,24 @@ class Move():
                    other.point)
 
 
-class GameState():
+class GameState:
     def __init__(self, board, next_player, previous, move):
         self.board = board
-        self.next_player = next_player
+        self.next_player = next_player  # <1>
         self.previous_state = previous
-        if previous is None:
-            self.previous_states = frozenset()
+        if previous is None:  # todo think if we can reduce this
+            self.previous_states = set()
         else:
-            self.previous_states = frozenset(
+            self.previous_states = set(
                 previous.previous_states |
-                {(previous.next_player, previous.board.zobrist_hash())})
-        self.last_move = move
+                {(previous.next_player, previous.board.zobrist_hash())})  # <2>
+        self.last_move = move  # <3>
 
-    def apply_move(self, move):
+    # <1>: next_player means the current player for current state
+    # <2>: save the current player and the board before current player place the stone.
+    # <3>: this move is the last move in the previous state.
+
+    def apply_move(self, move):  # <1>
         """Return the new GameState after applying the move."""
         if move.is_play:
             next_board = copy.deepcopy(self.board)
@@ -336,6 +306,8 @@ class GameState():
         else:
             next_board = self.board
         return GameState(next_board, self.next_player.other, self, move)
+
+    # <1>: code didn't check if this is a valid move before apply move.
 
     @classmethod
     def new_game(cls, board_size):
@@ -351,17 +323,19 @@ class GameState():
 
     @property
     def situation(self):
-        return (self.next_player, self.board)
+        return (self.next_player, self.board)  # <1>
+
+    # return the current board position and current play (the one that is going to place a stone on current board)
 
     def does_move_violate_ko(self, player, move):
         if not move.is_play:
             return False
-        if not self.board.will_capture(player, move.point):
-            return False
         next_board = copy.deepcopy(self.board)
         next_board.place_stone(player, move.point)
-        next_situation = (player.other, next_board.zobrist_hash())
+        next_situation = (player.other, next_board.zobrist_hash())  # <1>
         return next_situation in self.previous_states
+
+    # <1> check if the next player faces the situation where he saw before.
 
     def is_valid_move(self, move):
         if self.is_over():
@@ -383,7 +357,7 @@ class GameState():
             return False
         return self.last_move.is_pass and second_last_move.is_pass
 
-    def legal_moves(self):
+    def legal_moves(self):  # <1>
         if self.is_over():
             return []
         moves = []
@@ -397,6 +371,8 @@ class GameState():
         moves.append(Move.resign())
 
         return moves
+
+    # <1> this function will loop all the point, and it is expensive to call it frequently.
 
     def winner(self):
         if not self.is_over():

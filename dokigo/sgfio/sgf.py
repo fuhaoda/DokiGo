@@ -51,8 +51,8 @@ colour	single-character string: 'b' or 'w'
 point	pair (int, int) of coordinates
 move	point or None (for a pass)
 
+In DokiGo, the map is as below
 point values are treated as (row, column). The bottom left is (0, 0) (the same orientation as GTP, but not SGF). So the coordinates for a 9x9 board are as follows:
-
 9 (8,0)  .  .  .  .  .  (8,8)
 8  .  .  .  .  .  .  .  .  .
 7  .  .  .  .  .  .  .  .  .
@@ -63,7 +63,19 @@ point values are treated as (row, column). The bottom left is (0, 0) (the same o
 2  .  .  .  .  .  .  .  .  .
 1 (0,0)  .  .  .  .  .  (0,8)
    A  B  C  D  E  F  G  H  J
-
+   
+In SGF, the map is as below
+A9 (8,0)  .  .  .  .  .  (8,8)
+B8  .  .  .  .  .  .  .  .  .
+C7  .  .  .  .  .  .  .  .  .
+D6  .  .  .  .  .  .  .  .  .
+E5  .  .  .  .  .  .  .  .  .
+F4  .  .  .  .  .  .  .  .  .
+G3  .  .  .  .  .  .  .  .  .
+H2 .  .  .  .  .  .  .  .  .
+I1 (0,0)  .  .  .  .  .  (0,8)
+   A  B  C  D  E  F  G  H  I
+   1  2  3  4  5  6  7  8  9
 For more information
 https://mjw.woodcraft.me.uk/sgfmill/doc/1.1.1/intro.html
 

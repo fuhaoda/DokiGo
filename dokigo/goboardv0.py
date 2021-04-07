@@ -161,7 +161,7 @@ class GameState:
         next_board.place_stone(player, move.point)
         next_situation = (player.other, next_board)
         past_state = self.previous_state
-        while past_state is not None:  # todo: How to handle circular ko
+        while past_state is not None:
             if past_state.situation == next_situation:
                 return True
             past_state = past_state.previous_state

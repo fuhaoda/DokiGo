@@ -20,7 +20,8 @@ empty_barod = 0
 codes = []
 for row in range(1,20):
     for col in range(1,20):
-        for state in (Player.black, Player.white, None):
+        for state in (Player.black, Player.white, None): #todo: evaluate if None is really necessary conditional on
+            # the empty board is coded as 0
             code = random.randint(1,MAX63)
             table[Point(row, col), state] = code
             codes.append(code)

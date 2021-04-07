@@ -2,7 +2,8 @@
 
 from dokigo.base import Player
 from dokigo.scoring import compute_game_result
-
+import os
+from dokigo.sgfio import sgf
 
 class DokiGo_to_SGF:
     def __init__(self):
@@ -54,11 +55,43 @@ class SGF_to_DokiGo:
         self._count_episods()
 
     def _count_episods(self):
-        pass
+        if not os.path.exists(self.file_path):
+            print(f"There is no directory under name {self.file_path}")
+            return None
+        self.sgf_files = os.listdir(self.file_path)
+        for file in self.sgf_files:
+            if file.split(".")[-1] != "sgf":
+                self.sgf_files.remove(file)
+        self.total_episods = len(self.sgf_files)
 
     def parse_one_episod(self, sgf_file):
-        pass
+        file_location = os.path.join(self.file_path, sgf_file)
+        if not os.path.exists(file_location):
+            print(f"There is no SGF file as {file_location}")
+            return None
 
-    def parse_episods(self, size = None):
+        with open(file_location, "rb") as f:
+            game = sgf.Sgf_game.from_bytes(f.read())
+
+
+
+        board_size = game.get_size()
+        self.generator.new_game(board_size)
+
+        winner = game.get_winner()
+        self.generator.set_winner(winner)
+
+        main_sequence = game.get_main_sequence()
+
+        if len(main_sequence) == 0:
+            return None
+
+        for node in main_sequence[1:]:
+            # self.generator.set_move(node.get_move())
+            print(node.get_move())
+
+
+
+    def parse_episods(self, size=None):
         pass
 

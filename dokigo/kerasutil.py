@@ -3,8 +3,8 @@ import tempfile
 import os
 
 import h5py
-import keras
-from keras.models import load_model, save_model
+from tensorflow import keras
+from tensorflow.keras.models import load_model, save_model
 
 
 def save_model_to_hdf5_group(model, f):

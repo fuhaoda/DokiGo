@@ -1,3 +1,6 @@
+"""
+This is a goboard implementation by change the set as fronenset to speed up
+"""
 import copy
 from dokigo.base import Player, Point
 from dokigo import zobrist

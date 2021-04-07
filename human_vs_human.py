@@ -1,4 +1,4 @@
-from dokigo import goboardv2 as goboard
+from dokigo import goboardv3 as goboard
 from dokigo import base
 from dokigo.utilities import print_board,print_move,point_from_coords
 import random
@@ -28,7 +28,7 @@ def main():
                     move = goboard.Move.play(point)
                     if game.board.is_on_grid(move.point) and game.is_valid_move(move):
                         break
-                print("This is not a value move!")
+                print("This is not a valid move!")
         else:
             while True:
                 human_move = input('-- ')
@@ -43,7 +43,7 @@ def main():
                     move = goboard.Move.play(point)
                     if game.board.is_on_grid(move.point) and game.is_valid_move(move):
                         break
-                print("This is not a value move!")
+                print("This is not a valid move!")
         print_move(game.next_player,move)
         game = game.apply_move(move)
 
