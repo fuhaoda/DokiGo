@@ -4,7 +4,7 @@ import random
 from dokigo.agent import base
 from dokigo.base import Player
 #from dokigo.agent.naive import RandomBot
-from dokigo.agent.naive_v2 import FastRandomBot as RandomBot
+from dokigo.agent.naive import FastRandomBot as RandomBot
 
 __all__ = ['MCTSAgent']
 

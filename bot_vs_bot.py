@@ -1,6 +1,6 @@
-from dokigo.agent.naive import RandomBot
+from dokigo.agent.naive import FastRandomBot
 from dokigo.agent.mcts import MCTSAgent
-from dokigo import goboardv3 as goboard
+from dokigo import goboard
 from dokigo import base
 from dokigo.utilities import print_board,print_move,point_from_coords
 import random
@@ -15,7 +15,7 @@ def main():
     for m in range(total_games):
 
         game = goboard.GameState.new_game(board_size)
-        bot_1 = RandomBot()
+        bot_1 = FastRandomBot()
         bot_2 = MCTSAgent(100, 1.5)
         bot_1_color = random.choice(list(base.Player))
         bot_2_color = bot_1_color.other

@@ -1,6 +1,6 @@
 from dokigo.agent.naive import RandomBot
 from dokigo.agent.mcts import MCTSAgent
-from dokigo import goboardv3 as goboard
+from dokigo import goboard
 from dokigo import base
 from dokigo.utilities import print_board,print_move,point_from_coords
 import random

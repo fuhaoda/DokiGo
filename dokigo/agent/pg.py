@@ -5,8 +5,8 @@ from tensorflow.keras.optimizers import SGD
 from dokigo.agent.base import Agent
 from dokigo.agent.utilities import is_point_an_eye
 from dokigo import encoders
-from dokigo import goboardv3
-from dokigo import kerasutil
+from dokigo import goboard
+from dokigo import utilities
 
 __all__ = [
     'PolicyAgent',

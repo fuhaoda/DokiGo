@@ -1,6 +1,6 @@
 from dokigo.base import Point, Player
 from dokigo.encoders.base import get_encoder_by_name
-from dokigo import goboardv3 as goboard
+from dokigo import goboard
 import numpy as np
 
 
@@ -36,7 +36,10 @@ class Generator:
             self.winner = None
 
     def _point(self, sgf_point):
-        return Point(row=sgf_point[0] + 1, col=sgf_point[1] + 1)
+        if sgf_point:
+            return Point(row=sgf_point[0] + 1, col=sgf_point[1] + 1)
+        else:
+            return None
 
 
 class SupervisedLearningDataGenerator(Generator):
@@ -61,11 +64,14 @@ class SupervisedLearningDataGenerator(Generator):
         # also when we finish one game, we need to clean the data.
         self.boards.append(self.encoder.encode(self.game))
         move_one_hot = np.zeros(self.encoder.num_points())
-        move = goboard.Move(point=self._point(location))
-        move_one_hot[self.encoder.encode_point(move.point)] = 1
+        if self._point(location):
+            move = goboard.Move(point=self._point(location))
+            move_one_hot[self.encoder.encode_point(move.point)] = 1
+        else:
+            move = goboard.Move(is_pass=True)
         self.moves.append(move_one_hot)
         self.game.next_player = self._player(color)
-        self.game.apply_move(move)
+        self.game = self.game.apply_move(move)
 
     def return_data(self):
-        return self.boards, self.moves
+        return np.array(self.boards), np.array(self.moves)

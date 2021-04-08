@@ -12,7 +12,7 @@ class OnePlaneEncoder(Encoder):
     def name(self):
         return 'oneplane'
 
-    def encode(self, game_state):
+    def encode(self, game_state):  # <1>
         board_matrix = np.zeros(self.shape())
         next_player = game_state.next_player
         for r in range(self.board_height):
@@ -26,6 +26,8 @@ class OnePlaneEncoder(Encoder):
                 else:
                     board_matrix[0, r, c] = -1
         return board_matrix
+
+    # <1>: To encode, we fill a matrix with 1 if the point contains one of the current player's stones, -1 if the point contains the opponent's stones and 0 if the point is empty.
 
     def encode_point(self, point):
         return self.board_width * (point.row - 1) + point.col - 1

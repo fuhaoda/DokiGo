@@ -3,8 +3,8 @@ import numpy as np
 from dokigo.agent.base import Agent
 from dokigo.agent.utilities import is_point_an_eye
 from dokigo import encoders
-from dokigo import goboardv3 as goboard
-from dokigo import kerasutil
+from dokigo import goboard
+from dokigo import utilities
 
 __all__ = [
     'DeepLearningAgent',
@@ -54,11 +54,11 @@ class DeepLearningAgent(Agent):
         h5file['encoder'].attrs['board_width'] = self.encoder.board_width
         h5file['encoder'].attrs['board_height'] = self.encoder.board_height
         h5file.create_group('model')
-        kerasutil.save_model_to_hdf5_group(self.model, h5file['model'])
+        utilities.save_model_to_hdf5_group(self.model, h5file['model'])
 
 
 def load_prediction_agent(h5file):
-    model = kerasutil.load_model_from_hdf5_group(h5file['model'])
+    model = utilities.load_model_from_hdf5_group(h5file['model'])
     encoder_name = h5file['encoder'].attrs['name']
     if not isinstance(encoder_name, str):
         encoder_name = encoder_name.decode('ascii')

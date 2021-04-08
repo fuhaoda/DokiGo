@@ -1,7 +1,7 @@
 import numpy as np
 
 from dokigo.encoders.base import Encoder
-from dokigo.goboardv2 import Move, Point
+from dokigo.goboard import Move, Point
 
 
 class BetaGoEncoder(Encoder):

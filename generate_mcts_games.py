@@ -1,6 +1,6 @@
 import argparse
 from multiprocessing import Process, cpu_count
-from dokigo import goboardv4 as goboard
+from dokigo import goboard
 from dokigo.agent import mcts
 import os
 from dokigo.sgfio import sgf, adaptor

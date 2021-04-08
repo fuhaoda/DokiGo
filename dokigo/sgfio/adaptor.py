@@ -4,6 +4,7 @@ from dokigo.base import Player
 from dokigo.scoring import compute_game_result
 import os
 from dokigo.sgfio import sgf
+import numpy as np
 
 class DokiGo_to_SGF:
     def __init__(self):
@@ -87,11 +88,22 @@ class SGF_to_DokiGo:
             return None
 
         for node in main_sequence[1:]:
-            # self.generator.set_move(node.get_move())
-            print(node.get_move())
+            self.generator.set_move(node.get_move())
 
-
+        return self.generator.return_data()
 
     def parse_episods(self, size=None):
-        pass
+        Xt = []
+        yt = []
+
+        for file in self.sgf_files:
+            X, y = self.parse_one_episod(file)
+            Xt.append(X)
+            yt.append(y)
+
+        X = np.concatenate(Xt)
+        y = np.concatenate(yt)
+
+        return X,y
+
 

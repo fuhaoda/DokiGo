@@ -4,12 +4,13 @@ from dokigo.sgfio.data_generator import SupervisedLearningDataGenerator
 from dokigo.encoders.base import get_encoder_by_name
 from dokigo.sgfio import sgf
 import numpy as np
-
 from dokigo.utilities import print_board,print_move,point_from_coords
+from dokigo.sgfio.adaptor import SGF_to_DokiGo
 
+from dokigo import goboard
 
 class TestSGFIO(unittest.TestCase):
-    def test_adaptor(self):
+    def test_generator(self):
 
         encoder_name = 'oneplane'
         generator = SupervisedLearningDataGenerator(encoder_name)
@@ -34,7 +35,7 @@ class TestSGFIO(unittest.TestCase):
         self.assertEqual(X[0].tolist(),expected_X.tolist())
         self.assertEqual(y[0].tolist(), expected_y.tolist())
 
-        #todo: X[1] is incorrect
+        #todo: develop unit test for X[1], and X[2]
         node = main_sequence[2]
         generator.set_move(node.get_move())
 
@@ -43,14 +44,22 @@ class TestSGFIO(unittest.TestCase):
         generator.set_move(node.get_move())
         X, y = generator.return_data()
 
-        print(X[1])
-        print(y[1])
 
 
-class TestGoBoardV3(unittest.TestCase):
+    def test_adaptor_sgf_2_dokigo(self):
+        encoder_name = 'oneplane'
+        generator = SupervisedLearningDataGenerator(encoder_name)
+        sgf_data_retriever = SGF_to_DokiGo("test_data",generator)
+        X, y = sgf_data_retriever.parse_one_episod('game1.sgf')
+        self.assertTrue(isinstance(X,np.ndarray))
+        self.assertTrue(isinstance(y,np.ndarray))
+        self.assertEqual(X.shape, (61,1,9,9))
+        self.assertEqual(y.shape, (61,81))
+
+
+class TestGoBoard(unittest.TestCase):
 
     def test_ko(self):
-        from dokigo import goboardv4 as goboard
         board_size = 9
         game = goboard.GameState.new_game(board_size)
         single_ko_moves = ['A2','A3','C2','C3','B1','B4','B3','B2']

@@ -1,6 +1,9 @@
 from dokigo import base
-import numpy as np
-
+import tempfile
+import os
+import h5py
+from tensorflow.keras.models import load_model, save_model
+from dokigo.encoders.base import get_encoder_by_name
 COLS = 'ABCDEFGHJKLMNOPQRST'
 
 STONE_TO_CHAR = {
@@ -40,20 +43,35 @@ def coords_from_point(point):
     return '%s%d'%(COLS[point.col-1], point.row)
 
 
-# Todo: The following function is only used in goboardv2 with alpha go implementation, we can evaluate if it is
-#  needed for education purpose.
-class MoveAge():
-    def __init__(self, board):
-        self.move_ages = - np.ones((board.num_rows, board.num_cols))
+def save_nn_model(h5file_name, model, encoder):
+    with h5py.File(h5file_name,'w') as h5file:
+        h5file.create_group('encoder')
+        h5file['encoder'].attrs['name'] = encoder.name()
+        h5file['encoder'].attrs['board_width'] = encoder.board_width
+        h5file['encoder'].attrs['board_height'] = encoder.board_height
+        h5file.create_group('model')
+        with tempfile.NamedTemporaryFile() as f:
+            model.save(f.name, save_format='h5')
+            serialized_model = h5py.File(f.name, 'r')
+            root_item = serialized_model.get('/')
+            serialized_model.copy(root_item, h5file['model'], 'kerasmodel')
 
-    def get(self, row, col):
-        return self.move_ages[row, col]
+def load_nn_model(h5file_name):
+    with h5py.File(h5file_name,'r') as h5file:
+        with tempfile.NamedTemporaryFile() as f:
+            serialized_model = h5py.File(f.name, 'w')
+            root_item = h5file.get('model/kerasmodel')
+            for attr_name, attr_value in root_item.attrs.items():#todo check if there is a simpler way
+                serialized_model.attrs[attr_name] = attr_value
+            for k in root_item.keys():
+                h5file.copy(root_item.get(k), serialized_model, k)
+            model = load_model(f.name)
 
-    def reset_age(self, point):
-        self.move_ages[point.row - 1, point.col - 1] = -1
-
-    def add(self, point):
-        self.move_ages[point.row - 1, point.col - 1] = 0
-
-    def increment_all(self):
-        self.move_ages[self.move_ages > -1] += 1
+        encoder_name = h5file['encoder'].attrs['name']
+        if not isinstance(encoder_name, str):
+            encoder_name = encoder_name.decode('ascii')
+        board_width = h5file['encoder'].attrs['board_width']
+        board_height = h5file['encoder'].attrs['board_height']
+        encoder = get_encoder_by_name(
+            encoder_name, (board_width,board_height))
+    return model, encoder

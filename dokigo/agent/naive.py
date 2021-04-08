@@ -1,22 +1,41 @@
-import random
+import numpy as np
 from dokigo.agent.base import Agent
-from dokigo.goboardv3 import Move #todo: make the Move do not dependent on goboard
+from dokigo.goboard import Move  # todo: make the Move do not dependent on goboard
 from dokigo.base import Point
 from dokigo.agent.utilities import is_point_an_eye
 
-__all__ = ['RandomBot']
+__all__ = ['FastRandomBot']
 
 
-class RandomBot(Agent):
+class FastRandomBot(Agent):
+    def __init__(self):
+        Agent.__init__(self)
+        self.dim = None
+        self.point_cache = []
+
+    def _update_cache(self, dim):  # <1>
+        self.dim = dim
+        rows, cols = dim
+        self.point_cache = []
+        for r in range(1, rows + 1):
+            for c in range(1, cols + 1):
+                self.point_cache.append(Point(row=r, col=c))
+
+    # <1> using catche to speed up
+
     def select_move(self, game_state):
-        candidates = []
-        for r in range(1, game_state.board.num_rows + 1):
-            for c in range(1, game_state.board.num_cols + 1):
-                candidate = Point(row=r, col=c)
-                if game_state.is_valid_move(Move.play(candidate)) and not is_point_an_eye(game_state.board, candidate,
-                                                                                          game_state.next_player):
-                    candidates.append(candidate)
-        if not candidates:
-            return Move.pass_turn()
+        """Choose a random valid move that preserves our own eyes."""
+        dim = (game_state.board.num_rows, game_state.board.num_cols)
+        if dim != self.dim:
+            self._update_cache(dim)
 
-        return Move.play(random.choice(candidates))
+        idx = np.arange(len(self.point_cache))
+        np.random.shuffle(idx)
+        for i in idx:
+            p = self.point_cache[i]
+            if game_state.is_valid_move(Move.play(p)) and \
+                    not is_point_an_eye(game_state.board,
+                                        p,
+                                        game_state.next_player):
+                return Move.play(p)
+        return Move.pass_turn()
