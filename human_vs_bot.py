@@ -1,18 +1,22 @@
-from dokigo.agent.naive import RandomBot
 from dokigo.agent.mcts import MCTSAgent
+from dokigo.agent.predict import DeepLearningAgent
+
 from dokigo import goboard
 from dokigo import base
-from dokigo.utilities import print_board,print_move,point_from_coords
+from dokigo.utilities import print_board,print_move,point_from_coords, load_nn_model
 import random
 
 from dokigo.sgfio import sgf, adaptor
 
+import os
 
 def main():
     board_size = 9
     game = goboard.GameState.new_game(board_size)
     #bot = RandomBot()
-    bot = MCTSAgent(100,1.5)
+    #bot = MCTSAgent(100,1.5)
+    model, encoder = load_nn_model("dokigo/DL_policy_prediction_MCTS/mcts_r50k.h5")
+    bot = DeepLearningAgent(model, encoder)
     human_player = random.choice(list(base.Player))
     print("Game Start! You will play: %s and AI will play: %s" % (human_player.name, human_player.other.name))
 

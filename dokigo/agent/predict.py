@@ -8,7 +8,6 @@ from dokigo import utilities
 
 __all__ = [
     'DeepLearningAgent',
-    'load_prediction_agent',
 ]
 
 
@@ -21,7 +20,7 @@ class DeepLearningAgent(Agent):
     def predict(self, game_state):
         encoded_state = self.encoder.encode(game_state)
         input_tensor = np.array([encoded_state])
-        return self.model.predict(input_tensor)[0]
+        return self.model.predict(input_tensor.reshape(-1,9,9,1))[0] #todo check dimension and reshape operation rule
 
     def select_move(self, game_state):
         num_moves = self.encoder.board_width * self.encoder.board_height
@@ -48,22 +47,4 @@ class DeepLearningAgent(Agent):
     # <3> Starting from the top, find a valid move that doesn't reduce eye-space.
     # <4> If no legal and non-self-destructive moves are left, pass.
 
-    def serialize(self, h5file):
-        h5file.create_group('encoder')
-        h5file['encoder'].attrs['name'] = self.encoder.name()
-        h5file['encoder'].attrs['board_width'] = self.encoder.board_width
-        h5file['encoder'].attrs['board_height'] = self.encoder.board_height
-        h5file.create_group('model')
-        utilities.save_model_to_hdf5_group(self.model, h5file['model'])
 
-
-def load_prediction_agent(h5file):
-    model = utilities.load_model_from_hdf5_group(h5file['model'])
-    encoder_name = h5file['encoder'].attrs['name']
-    if not isinstance(encoder_name, str):
-        encoder_name = encoder_name.decode('ascii')
-    board_width = h5file['encoder'].attrs['board_width']
-    board_height = h5file['encoder'].attrs['board_height']
-    encoder = encoders.get_encoder_by_name(
-        encoder_name, (board_width, board_height))
-    return DeepLearningAgent(model, encoder)

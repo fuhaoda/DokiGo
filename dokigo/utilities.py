@@ -1,8 +1,7 @@
 from dokigo import base
 import tempfile
-import os
 import h5py
-from tensorflow.keras.models import load_model, save_model
+from tensorflow.keras.models import load_model
 from dokigo.encoders.base import get_encoder_by_name
 COLS = 'ABCDEFGHJKLMNOPQRST'
 

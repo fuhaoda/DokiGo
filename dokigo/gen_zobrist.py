@@ -20,12 +20,12 @@ empty_barod = 0
 codes = []
 for row in range(1,20):
     for col in range(1,20):
-        for state in (Player.black, Player.white, None): #todo: evaluate if None is really necessary conditional on
-            # the empty board is coded as 0. Based on initial evaluation, it is not necessary
+        for state in (Player.black, Player.white): #<1>
             code = random.randint(1,MAX63)
             table[Point(row, col), state] = code
             codes.append(code)
-
+#<1> we only need zobrist code for black and white, no need for empty.
+# Because empty = A, black = B, white = C is equivalent to empty = 0, black = A xor B, white = A xor C.
 for code in codes:
     if codes.count(code) > 1:
         print("Hash collision occurred! Please change a different random seed!!")

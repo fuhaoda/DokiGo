@@ -39,7 +39,7 @@ model.compile(loss='categorical_crossentropy',
 
 model.fit(X_train, Y_train,
           batch_size=32,
-          epochs=1,
+          epochs=200,
           verbose=1,
           validation_data=(X_test, Y_test))
 score = model.evaluate(X_test, Y_test, verbose=0)
