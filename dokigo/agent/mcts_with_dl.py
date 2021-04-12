@@ -1,10 +1,12 @@
+#todo: this bot is not strong and likely even weaker than the dl prediction, we need to check the code
 import math
 import random
 
 from dokigo.agent import base
 from dokigo.base import Player
-from dokigo.agent.naive import FastRandomBot as RandomBot
-
+from dokigo.agent.predict import DeepLearningAgent
+from dokigo import goboard
+from dokigo.utilities import load_nn_model
 __all__ = ['MCTSAgent']
 
 class MCTSNode(object):
@@ -47,6 +49,10 @@ class MCTSAgent(base.Agent):
         base.Agent.__init__(self)
         self.num_rounds = num_rounds
         self.temperature = temperature
+        board_size = 9
+        game = goboard.GameState.new_game(board_size)
+        model, encoder = load_nn_model("dokigo/DL_policy_prediction_MCTS/mcts_r50k.h5")
+        self.bot = DeepLearningAgent(model, encoder)
 
 # tag::mcts-signature[]
     def select_move(self, game_state):
@@ -117,13 +123,8 @@ class MCTSAgent(base.Agent):
         return best_child
 # end::mcts-uct[]
 
-    @staticmethod
-    def simulate_random_game(game):
-        bots = {
-            Player.black: RandomBot(),
-            Player.white: RandomBot(),
-        }
+    def simulate_random_game(self,game):
         while not game.is_over():
-            bot_move = bots[game.next_player].select_move(game)
+            bot_move = self.bot.select_move(game)
             game = game.apply_move(bot_move)
         return game.winner()

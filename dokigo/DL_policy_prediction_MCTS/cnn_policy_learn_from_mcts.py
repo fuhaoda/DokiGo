@@ -16,7 +16,7 @@ size = 9
 input_shape = (size, size , 1)
 
 X = X.reshape(samples, size,size,1)
-train_samples = 8000
+train_samples = 9500
 
 X_train, X_test = X[:train_samples], X[train_samples:]
 Y_train, Y_test = Y[:train_samples], Y[train_samples:]
@@ -39,7 +39,7 @@ model.compile(loss='categorical_crossentropy',
 
 model.fit(X_train, Y_train,
           batch_size=32,
-          epochs=200,
+          epochs=300,
           verbose=1,
           validation_data=(X_test, Y_test))
 score = model.evaluate(X_test, Y_test, verbose=0)
