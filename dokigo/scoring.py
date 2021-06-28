@@ -70,7 +70,7 @@ def evaluate_territory(board):
                 continue
             stone = board.get(p)
             if stone is not None:  # <2>
-                status[p] = board.get(p)
+                status[p] = board.get(p)  # return the color of the stone
             else:
                 group, neighbors = _collect_region(p, board)
                 if len(neighbors) == 1:  # <3>
@@ -87,7 +87,7 @@ def evaluate_territory(board):
 # <2> If the point is a stone, add it as status.
 # <3> If a point is completely surrounded by black or white stones, count it as territory.
 # <4> Otherwise the point has to be a neutral point, so we add it to dame.
-# end::scoring_evaluate_territory[]
+
 
 
 """ _collect_region:
@@ -97,7 +97,6 @@ identify all the boundary points.
 """
 
 
-# tag::scoring_collect_region[]
 def _collect_region(start_pos, board, visited=None):
 
     if visited is None:
@@ -121,7 +120,7 @@ def _collect_region(start_pos, board, visited=None):
         else:
             all_borders.add(neighbor)
     return all_points, all_borders
-# end::scoring_collect_region[]
+
 
 
 # tag::scoring_compute_game_result[]
